@@ -1,0 +1,319 @@
+1)simple lenear regression
+
+Simple linear regression
+import matplotlib.pyplot as plt
+import numpy as np
+from math import sqrt
+ 
+# Calculate root mean squared error
+def rmse_metric(actual, predicted):
+	sum_error = 0.0
+	for i in range(len(actual)):
+		prediction_error = predicted[i] - actual[i]
+		sum_error += (prediction_error ** 2)
+	mean_error = sum_error / float(len(actual))
+	return sqrt(mean_error)
+
+# Evaluate regression algorithm on training dataset
+def evaluate_algorithm(dataset, algorithm):
+	test_set = list()
+	for row in dataset:
+		row_copy = list(row)
+		row_copy[-1] = None
+		test_set.append(row_copy)
+	predicted = algorithm(dataset, test_set)
+	print(predicted)
+	actual = [row[-1] for row in dataset]
+	rmse = rmse_metric(actual, predicted)
+	return rmse
+
+# Calculate the mean value of a list of numbers
+def mean(values):
+	return sum(values) / float(len(values))
+
+# Calculate covariance between x and y
+def covariance(x, mean_x, y, mean_y):
+	covar = 0.0
+	for i in range(len(x)):
+		covar += (x[i] - mean_x) * (y[i] - mean_y)
+	return covar
+ 
+# Calculate the variance of a list of numbers
+def variance(values, mean):
+	return sum([(x-mean)**2 for x in values])
+ 
+# Calculate coefficients
+def coefficients(dataset):
+	x = [row[0] for row in dataset]
+	y = [row[1] for row in dataset]
+	x_mean, y_mean = mean(x), mean(y)
+	b1 = covariance(x, x_mean, y, y_mean) / variance(x, x_mean)
+	b0 = y_mean - b1 * x_mean
+	return [b0, b1]
+ 
+# Simple linear regression algorithm
+def simple_linear_regression(train, test):
+	predictions = list()
+	b0, b1 = coefficients(train)
+	for row in test:
+		yhat = b0 + b1 * row[0]
+		predictions.append(yhat)
+	return predictions
+ 
+# Test simple linear regression
+dataset = [[1, 1], [2, 3], [4, 3], [3, 2], [5, 5]]
+x = [row[0] for row in dataset]
+y = [row[1] for row in dataset]
+mean_x, mean_y = mean(x), mean(y)
+var_x, var_y = variance(x, mean_x), variance(y, mean_y)
+print('x stats: mean=%.3f variance=%.3f' % (mean_x, var_x))
+print('y stats: mean=%.3f variance=%.3f' % (mean_y, var_y))
+covar = covariance(x, mean_x, y, mean_y)
+print('Covariance: %.3f' % (covar))
+rmse = evaluate_algorithm(dataset, simple_linear_regression)
+print('RMSE: %.3f' % (rmse))
+# calculate coefficients
+b0, b1 = coefficients(dataset)
+print('Coefficients: B0=%.3f, B1=%.3f' % (b0, b1))
+
+
+
+2)find-s Algorithm
+
+import pandas as pd
+import numpy as np
+#to read the data in the csv file
+data = pd.read_csv("Data.csv")
+print(data)
+Time Weather Temperature Company Humidity Wind Goes
+0 Morning Sunny Warm Yes Mild Strong Yes
+1 Evening Rainy Cold No Mild Normal No
+2 Morning Sunny Moderate Yes Normal Normal Yes
+3 Evening Sunny Cold Yes High Strong Yes
+#making an array of all the attributes
+d = np.array(data)[:,:-1]
+print("The attributes are: ",d)
+The attributes are: [['Morning' 'Sunny' 'Warm' 'Yes' 'Mild' 'Strong']
+['Evening' 'Rainy' 'Cold' 'No' 'Mild' 'Normal']
+['Morning' 'Sunny' 'Moderate' 'Yes' 'Normal' 'Normal']
+['Evening' 'Sunny' 'Cold' 'Yes' 'High' 'Strong']]
+#segragating the target that has positive and negative examples
+target = np.array(data)[:,-1]
+print("The target is: ",target)
+The target is: ['Yes' 'No' 'Yes' 'Yes']
+#training function to implement find-s algorithm
+def train(c,t):
+for i, val in enumerate(t):
+if val == "Yes":
+specific_hypothesis = c[i].copy()
+break
+for i, val in enumerate(c):
+if t[i] == "Yes":
+for x in range(len(specific_hypothesis)):
+if val[x] != specific_hypothesis[x]:
+specific_hypothesis[x] = '?'
+else:
+pass
+return specific_hypothesis
+
+#obtaining the final hypothesis
+print("The final hypothesis is:",train(d,target))
+
+
+
+3)candidate elemination algorithm
+
+# Importing Important Libraries
+import numpy as np
+import pandas as pd
+data=pd.read_csv('enjoysport.csv')
+print(data)
+concepts = np.array(data.iloc[:,0:-1])
+print(concepts)
+target = np.array(data.iloc[:,-1])
+print(target)
+# Candidate Elimination algorithm
+def learn(concepts, target):
+specific_h = concepts[0].copy()
+print("\nInitialization of specific_h and genearal_h&quot;)
+print("\nSpecific hypothesis: ", specific_h)
+general_h = [["?" for i in range(len(specific_h))] for i in range(len(specific_h))]
+print("\nGeneric hypothesis:",general_h)
+for i, h in enumerate(concepts):
+print("\nInstance", i+1 , "is ", h)
+if target[i] == "yes":
+print("Instance is Positive ")
+for x in range(len(specific_h)):
+if h[x]!= specific_h[x]:
+specific_h[x] ='?';
+general_h[x][x] ='?';
+if target[i] == "no":
+print("Instance is Negative ")
+for x in range(len(specific_h)):
+if h[x]!= specific_h[x]:
+general_h[x][x] = specific_h[x]
+else:
+general_h[x][x] = '?';
+print("Specific hypothesis after", i+1, "Instance is ", specific_h)
+print("Generic hypothesis after ", i+1, "Instance is ", general_h)
+print("\n")
+
+indices = [i for i, val in enumerate(general_h) if val == ['?', '?', '?', '?', '?', '?']]
+for i in indices:
+general_h.remove(['?', '?', '?', '?', '?', '?';])
+return specific_h, general_h
+s_final, g_final = learn(concepts, target)
+print("Final Specific_h:", s_final, sep="\n")
+print("Final General_h: ", g_final, sep="\n")
+
+
+4)ID3 algorithm
+
+# x is examples in training set
+# y is set of attributes
+# labels is labeled data
+# Node is a class which has properties values, childs, and next
+# root is top node in the decision tree# Declare:
+x = # Multi dimensional arrays
+y = # Column names of x
+labels = # Classification values, for example {0, 1, 0, 1}
+# correspond that row 1 is false, row 2 is true, and so on
+root = ID3(x, y, label, root)# Define:
+ID3(x, y, label, node)
+initialize node as a new node instance
+if all rows in x only have single classification c, then:
+insert label c into node
+return node
+if x is empty, then:
+insert dominant label in x into node
+return node
+bestAttr is an attribute with maximum information gain in x
+insert attribute bestAttr into node
+for vi in values of bestAttr:
+// For example, Outlook has three values: Sunny, Overcast, and Rain
+insert value vi as branch of node
+create viRows with rows that only contains value vi
+if viRows is empty, then:
+this node branch ended by a leaf with value is dominant label in x
+else:
+newY = list of attributes y with bestAttr removed
+nextNode = next node connected by this branch
+nextNode = ID3(viRows, newY, label, nextNode)
+return node
+
+
+
+
+
+program 5) navie bayes
+
+import csv
+import random
+import math
+def loadcsv(filename):
+lines = csv.reader(open(filename, &quot;r&quot;))
+dataset = list(lines)
+for i in range(len(dataset)):
+# converting the attributes from string to floating point numbers
+dataset[i] = [float(x) for x in dataset[i]]
+return dataset
+def splitDataset(dataset, splitRatio):
+trainSize = int(len(dataset) * splitRatio)
+trainSet = []
+copy = list(dataset)
+while len(trainSet) &lt; trainSize:
+index = random.randrange(len(copy)) # random index
+trainSet.append(copy.pop(index))
+return [trainSet, copy]
+def separateByClass(dataset):
+separated = {}
+for i in range(len(dataset)):
+vector = dataset[i]
+if (vector[-1] not in separated):
+separated[vector[-1]] = []
+separated[vector[-1]].append(vector)
+return separated
+def mean(numbers):
+return sum(numbers)/float(len(numbers))
+def stdev(numbers):
+avg = mean(numbers)
+variance = sum([pow(x-avg,2) for x in numbers])/float(len(numbers)-1)
+
+return math.sqrt(variance)
+def summarize(dataset):
+summaries = [(mean(attribute), stdev(attribute)) for attribute in zip(*dataset)]
+del summaries[-1]
+return summaries
+def summarizeByClass(dataset):
+separated = separateByClass(dataset)
+summaries = {}
+for classValue, instances in separated.items():
+summaries[classValue] = summarize(instances)
+return summaries
+def calculateProbability(x, mean, stdev):
+exponent = math.exp(-(math.pow(x-mean,2)/(2*math.pow(stdev,2))))
+return (1 / (math.sqrt(2*math.pi) * stdev)) * exponent
+def calculateClassProbabilities(summaries, inputVector):
+probabilities = {}
+for classValue, classSummaries in summaries.items():
+probabilities[classValue] = 1
+for i in range(len(classSummaries)):
+mean, stdev = classSummaries[i]
+x = inputVector[i]
+probabilities[classValue] *= calculateProbability(x, mean, stdev)
+return probabilities
+def predict(summaries, inputVector):
+probabilities = calculateClassProbabilities(summaries, inputVector)
+bestLabel, bestProb = None, -1
+for classValue, probability in probabilities.items():
+if bestLabel is None or probability &gt; bestProb:
+bestProb = probability
+bestLabel = classValue
+return bestLabel
+def getPredictions(summaries, testSet):
+predictions = []
+for i in range(len(testSet)):
+result = predict(summaries, testSet[i])
+
+predictions.append(result)
+return predictions
+def getAccuracy(testSet, predictions):
+correct = 0
+for i in range(len(testSet)):
+if testSet[i][-1] == predictions[i]:
+correct += 1
+return (correct/float(len(testSet))) * 100.0
+def main():
+filename = &#39;C:\\Users\\DELL\\.conda\\envs\\ml_env\\Scripts\\naivedata.csv&#39;
+splitRatio = 0.67
+dataset = loadcsv(filename)
+
+#print(&quot;\n The Data Set :\n&quot;,dataset)
+print(&quot;\n The length of the Data Set : &quot;,len(dataset))
+
+print(&quot;\n The Data Set Splitting into Training and Testing \n&quot;)
+trainingSet, testSet = splitDataset(dataset, splitRatio)
+
+print(&#39;\n Number of Rows in Training Set:{0} rows&#39;.format(len(trainingSet)))
+print(&#39;\n Number of Rows in Testing Set:{0} rows&#39;.format(len(testSet)))
+
+print(&quot;\n First Five Rows of Training Set:\n&quot;)
+for i in range(0,5):
+print(trainingSet[i],&quot;\n&quot;)
+
+print(&quot;\n First Five Rows of Testing Set:\n&quot;)
+for i in range(0,5):
+print(testSet[i],&quot;\n&quot;)
+
+# prepare model
+summaries = summarizeByClass(trainingSet)
+print(&quot;\n Model Summaries:\n&quot;,summaries)
+
+# test model
+
+predictions = getPredictions(summaries, testSet)
+print(&quot;\nPredictions:\n&quot;,predictions)
+
+accuracy = getAccuracy(testSet, predictions)
+print(&#39;\n Accuracy: {0}%&#39;.format(accuracy))
+main()
